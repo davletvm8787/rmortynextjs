@@ -1,11 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchCharacters, Character } from "@/lib/api";
 
-export const useCharacters = (status?: string, gender?: string, page: number = 1) => {
-  return useQuery<Character[], Error>({
-    queryKey: ["characters", status, gender, page],
-    queryFn: () => fetchCharacters(status, gender, page).then((data) => data.results),
-    staleTime: 5 * 60 * 1000, // 5 dakika cache süresi
-    cacheTime: 10 * 60 * 1000, // 10 dakika boyunca cache saklama
+export const useInfiniteCharacters = (status?: string, gender?: string) => {
+  return useInfiniteQuery({
+    queryKey: ["characters", status, gender],
+    queryFn: ({ pageParam = 1 }) => fetchCharacters(status, gender, pageParam),
+    getNextPageParam: (lastPage) => (lastPage.info.next ? lastPage.info.next.split("page=")[1] : undefined),
+    staleTime: 5 * 60 * 1000, // 5 dakika boyunca cache sakla
+    cacheTime: 10 * 60 * 1000,
   });
 };
